@@ -10,4 +10,63 @@
 [functions]
   node_bundler = "esbuild"
 
+[functions.getSectorData]
+  timeout = 300
+```
+
+**Important:** The last 2 lines (`[functions.getSectorData]` and `timeout = 300`) set the timeout to **5 minutes** (300 seconds).
+
+5. **Scroll down**
+6. **Commit message:** "Increase function timeout to 5 minutes"
+7. **Click "Commit changes"**
+
+---
+
+### **Step 2: Wait for Redeploy**
+
+1. **Wait 1 minute** for Netlify to auto-deploy
+2. **Check Netlify** → Deploys tab
+3. **Wait for "Published"** status
+
+---
+
+### **Step 3: Test Your Dashboard**
+
+1. **Go to your dashboard** URL
+2. **Click "🔄 Refresh Data"**
+3. **Wait 1-2 minutes** (5 sectors × 12 seconds = ~60 seconds + processing time)
+4. **Data should appear!** ✅
+
+---
+
+## ✅ **What Will Happen:**
+```
+Before: Function killed after 30 seconds → 502 error
+After:  Function runs for up to 5 minutes → Success! ✓
+
+Timeline:
+0:00 - Click Refresh
+0:12 - Fetched XLK
+0:24 - Fetched XLF  
+0:36 - Fetched XLV
+0:48 - Fetched XLE
+1:00 - Fetched SMH
+1:10 - Calculated signals
+1:15 - Data appears! 🎉
+```
+
+---
+
+## 🎯 **Expected Function Logs After Fix:**
+
+Instead of:
+```
+Duration: 30000 ms ❌ (timed out)
+```
+
+You should see:
+```
+Duration: 70000 ms ✅ (completed)
+Status: 200
+
   # Updated to trigger redeploy
