@@ -1,0 +1,16 @@
+{
+  "name": "sector-rotation-dashboard",
+  "version": "1.0.0",
+  "description": "Personal sector rotation monitoring dashboard",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "keywords": ["sectors", "rotation", "trading", "stocks"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
