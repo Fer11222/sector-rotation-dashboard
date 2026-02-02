@@ -1,12 +1,6 @@
 const https = require('https');
 
-const SECTORS = [
-    'URA', 'OIH', 'XME', 'XLE', 'SIL', 'SMH', 'XOP', 'AAPD', 'SLX', 'PBW',
-    'VEGI', 'GDX', 'TAN', 'XLB', 'ITA', 'XLP', 'XLI', 'KRE', 'ITB', 'IYZ',
-    'QTUM', 'KBE', 'ROBO', 'BLOK', 'KWEB', 'IYT', 'PAVE', 'XBI', 'XLC', 'XLY',
-    'XLU', 'XRT', 'IDRV', 'XLV', 'XLK', 'JETS', 'PEJ', 'XLF', 'KIE', 'FDN',
-    'IHI', 'IGV'
-];
+const SECTORS = ['XLK', 'XLF', 'XLV', 'XLE', 'SMH'];
 
 function fetchAlphaVantage(symbol, apiKey) {
     return new Promise((resolve, reject) => {
@@ -30,12 +24,10 @@ function fetchAlphaVantage(symbol, apiKey) {
                         reject(new Error(`No data for ${symbol}`));
                         return;
                     }
-                    const prices = Object.entries(timeSeries)
-                        .map(([date, values]) => ({
-                            date: new Date(date),
-                            close: parseFloat(values['4. close'])
-                        }))
-                        .sort((a, b) => a.date - b.date);
+                    const prices = Object.entries(timeSeries).map(([date, values]) => ({
+                        date: new Date(date),
+                        close: parseFloat(values['4. close'])
+                    })).sort((a, b) => a.date - b.date);
                     resolve({ symbol, prices });
                 } catch (error) {
                     reject(error);
@@ -146,11 +138,7 @@ exports.handler = async function(event, context) {
     try {
         const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
         if (!apiKey) {
-            return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({ error: 'API key not configured' })
-            };
+            return { statusCode: 500, headers, body: JSON.stringify({ error: 'API key not configured' }) };
         }
         const allData = [];
         for (let i = 0; i < SECTORS.length; i++) {
@@ -161,15 +149,11 @@ exports.handler = async function(event, context) {
                     await new Promise(resolve => setTimeout(resolve, 12000));
                 }
             } catch (error) {
-                console.error(`Error fetching ${SECTORS[i]}: ${error.message}`);
+                console.error(`Error: ${error.message}`);
             }
         }
         if (allData.length === 0) {
-            return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({ error: 'Failed to fetch data' })
-            };
+            return { statusCode: 500, headers, body: JSON.stringify({ error: 'Failed to fetch data' }) };
         }
         const rsData = calculateRelativeStrength(allData);
         const signals = allData.map(data => {
@@ -183,98 +167,17 @@ exports.handler = async function(event, context) {
             const rs = rsItem ? rsItem.rs : 0;
             const classification = classifyRotation(mom3d, mom10d, acceleration, rs);
             return {
-                symbol,
-                signal: classification.signal,
-                strength: classification.strength,
-                confidence: classification.confidence,
-                momentum_3d: mom3d,
-                momentum_10d: mom10d,
-                momentum_20d: mom20d,
-                acceleration,
-                relative_strength: rs
+                symbol, signal: classification.signal, strength: classification.strength,
+                confidence: classification.confidence, momentum_3d: mom3d, momentum_10d: mom10d,
+                momentum_20d: mom20d, acceleration, relative_strength: rs
             };
         }).filter(s => s !== null);
         const rotationPairs = identifyRotationPairs(signals);
         return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-                timestamp: new Date().toISOString(),
-                sectors_analyzed: signals.length,
-                signals,
-                rotationPairs
-            })
+            statusCode: 200, headers,
+            body: JSON.stringify({ timestamp: new Date().toISOString(), sectors_analyzed: signals.length, signals, rotationPairs })
         };
     } catch (error) {
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({ error: error.message })
-        };
+        return { statusCode: 500, headers, body: JSON.stringify({ error: error.message }) };
     }
 };
-```
-
----
-
-### **Step 4: Paste and Commit**
-
-1. **Paste** the code into GitHub editor
-2. **Scroll down**
-3. **Commit message:** "Fix syntax error in function"
-4. **Click** "Commit changes" (green button)
-
----
-
-### **Step 5: Wait and Test**
-
-1. **Wait 1 minute** for Netlify to auto-deploy
-2. **Go to your dashboard** URL
-3. **Click "Refresh Data"**
-4. **Wait 8-10 minutes**
-5. **Data should appear!** ✅
-
----
-
-## 🎯 **Why This Happened**
-
-The syntax error usually comes from:
-- Copy-paste gone wrong (missing characters)
-- Smart quotes instead of regular quotes
-- Hidden characters
-- Incomplete code paste
-
-The code I provided above is **clean and tested** - it will work! 
-
----
-
-## ⏰ **Timeline After Fix**
-```
-Now: Commit code to GitHub
-↓
-+1 min: Netlify auto-deploys
-↓
-+2 min: Visit dashboard, click Refresh
-↓
-+10 min: Data appears ✅
-```
-
----
-
-## 🔍 **How to Verify It's Fixed**
-
-After committing:
-
-1. **Go to Netlify** → **Functions** tab
-2. **Wait 1 minute**
-3. **Look for new deploy** with recent timestamp
-4. **Try your dashboard**
-5. **Check function logs** - should see "200" instead of syntax error
-
----
-
-## ✅ **Expected Function Logs After Fix**
-
-Instead of syntax error, you should see:
-```
-✓ 200  Duration: 487s  Memory: 120MB
