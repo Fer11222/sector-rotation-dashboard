@@ -9,3 +9,5 @@
 
 [functions]
   node_bundler = "esbuild"
+
+  # Updated to trigger redeploy
